@@ -10,8 +10,8 @@ namespace OnlineStoreTesting.Pages
     {
         private readonly By _addToCartLocator = By.XPath(".//span[contains(text(),'Add to Cart')]");
         private readonly By _cartNumber = By.ClassName("counter-number");
-        private readonly By _removeButtonLocator = By.XPath(".//*[contains(text(),'Remove')]");
-
+        private readonly By _addToCartLoader = By.XPath(".//div[@class='loader']");
+     
         public BagInformationPage(IWebDriver driver) : base(driver)
         {
         }
@@ -20,11 +20,12 @@ namespace OnlineStoreTesting.Pages
         {
             IWebElement addToCart= _driver.FindElement(_addToCartLocator);
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.InvisibilityOfElementLocated(_addToCartLoader));
             wait.Until(ExpectedConditions.ElementToBeClickable(_addToCartLocator));
             addToCart.Click();
-           
-            Thread.Sleep(3000);
-          
+            wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("counter-number")));
+            wait.Until(ExpectedConditions.InvisibilityOfElementLocated(_addToCartLoader));
+
 
         }
 
@@ -37,14 +38,7 @@ namespace OnlineStoreTesting.Pages
             return int.Parse(number);
 
         }
-        public void DeleteAllAddToCartProducts()
-        {
-            ReadOnlyCollection<IWebElement> remove = _driver.FindElements(_removeButtonLocator);
-            foreach (IWebElement element in remove)
-            {
-                element.Click();
-            }
-        }
+
 
 
     }

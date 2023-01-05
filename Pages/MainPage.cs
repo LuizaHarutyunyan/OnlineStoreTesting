@@ -13,6 +13,8 @@ namespace OnlineStoreTesting.Pages
     {
         private By _signInButtonLocator = By.ClassName("authorization-link");
         private By _createAccountButtonLocator = By.XPath(".//a[contains(text(),'Create an Account')]");
+        private By _customerMenuLocator = By.XPath(".//button[@class='action switch']");
+        private By _myAccountLocator = By.LinkText("My Account");
 
         public MainPage(IWebDriver driver) : base(driver)
         {
@@ -33,6 +35,14 @@ namespace OnlineStoreTesting.Pages
             IWebElement createAccount= _driver.FindElement(_createAccountButtonLocator);
             createAccount.Click();
             
+        }
+
+        public void NavigateToMyAccount()
+        {
+            IWebElement customerMenu= _driver.FindElement(_customerMenuLocator);
+            customerMenu.Click();
+            IWebElement myAccount = _driver.FindElement(_myAccountLocator);
+            myAccount.Click();
         }
     }
 }

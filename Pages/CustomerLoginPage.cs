@@ -42,7 +42,6 @@ namespace OnlineStoreTesting.Pages
         {
             var element = _driver.FindElement(_passwordInputLocator);
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-
             wait.Until((driver) => driver.FindElement(_passwordInputLocator));
             element.SendKeys(input);
 
@@ -53,7 +52,6 @@ namespace OnlineStoreTesting.Pages
             var element = _driver.FindElement(_signInFormButtonLocator);
             element.Click();
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(4));
-
             wait.Until((driver) => !driver.Title.StartsWith("Customer Login "));
 
         }

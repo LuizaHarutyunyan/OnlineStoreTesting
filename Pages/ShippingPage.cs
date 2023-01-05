@@ -17,7 +17,9 @@ namespace OnlineStoreTesting.Pages
         private readonly By _nextButtonLocator = By.XPath("//*[@id='shipping-method-buttons-container']/div");
         private readonly By _addNewAdressLocator = By.XPath(".//*[@class='action action-show-popup']");
         private readonly By _skippButtonLocator = By.ClassName("action-save-address");
-        private readonly By _shippingMethod = By.Name("ko_unique_3");
+        private readonly By _shippingMethod = By.Name("ko_unique_2");
+        private readonly By _addNewAdressCheckoutLoader = By.XPath(".//div[@id='checkout-loader']//div");
+        private readonly By _addNewAdressLoader = By.XPath(".//div[@data-role='loader']//div");
 
 
         public ShippingPage(IWebDriver driver) : base(driver)
@@ -31,13 +33,16 @@ namespace OnlineStoreTesting.Pages
             wait.Until((_driver)=>_driver.FindElement(_streetAdressLocator));
             wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(_streetAdressLocator));
             IWebElement streetAdress = _driver.FindElement(_streetAdressLocator);
+            wait.Until(ExpectedConditions.ElementToBeClickable(_streetAdressLocator));
             streetAdress.SendKeys(streetAdressInput);
-            wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(_streetAdressLocator));
             IWebElement city = _driver.FindElement(_cityNameLocator);
+            wait.Until(ExpectedConditions.ElementToBeClickable(_cityNameLocator));
             city.SendKeys(cityInput);
             IWebElement postalCode = _driver.FindElement(_postaclCodeLocator);
+            wait.Until(ExpectedConditions.ElementToBeClickable(_postaclCodeLocator));
             postalCode.SendKeys(postalCodeInput);
             IWebElement phoneNumber = _driver.FindElement(_phoneNumberLocator);
+            wait.Until(ExpectedConditions.ElementToBeClickable(_phoneNumberLocator));
             phoneNumber.SendKeys(random.Next().ToString());
             IWebElement province = _driver.FindElement(_countryLocator);
             SelectElement select = new SelectElement(province);
@@ -60,11 +65,12 @@ namespace OnlineStoreTesting.Pages
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30));
             wait.Until(ExpectedConditions.PresenceOfAllElementsLocatedBy(_addNewAdressLocator));
             IWebElement addNewAdress = _driver.FindElement(_addNewAdressLocator) ;
-            wait.Until((_driver) => _driver.FindElement(_addNewAdressLocator).Displayed);
+            wait.Until((driver) => driver.FindElements(_addNewAdressLoader).Count==0);
+            wait.Until((driver) => driver.FindElements(_addNewAdressCheckoutLoader).Count==0);
+            wait.Until(ExpectedConditions.ElementIsVisible(_addNewAdressLocator));
             wait.Until(ExpectedConditions.ElementToBeClickable(_addNewAdressLocator));
-            Thread.Sleep(3000);
             addNewAdress.Click();
-            Thread.Sleep(3000);
+        
            
         }
         public void Skip()

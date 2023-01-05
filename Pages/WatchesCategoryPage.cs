@@ -1,18 +1,17 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
-
+using SeleniumExtras.WaitHelpers;
 
 namespace OnlineStoreTesting.Pages
 {
     public class WatchesCategoryPage : BasePage
     {
-        private By _productLocator = By.XPath("//li[@class='item product product-item']");
-        private By _addToCartButtonLocator = By.XPath("(.//button[@title='Add to Cart'])[5]");
         private By _cartButtonLocator = By.XPath(".//a[@class='action showcart']");
         private By _proceedToCheckout = By.XPath("//*[@id='top-cart-btn-checkout']");
-        private By _numberOfItemsLocator = By.XPath(".//a[@href='https://magento.softwaretestingboard.com/checkout/cart/']//span[@class='counter qty']");
+        private By _numberOfItemsLocator = By.XPath(".//span[@class='counter qty']/parent::a[@class='action showcart']");
         private By _bagsButtonLocator = By.XPath(".//a[contains(text(),'Bags')]");
+        private readonly By _addingItemToCartLoader = By.XPath(".//div[@class='loader']");
         public WatchesCategoryPage(IWebDriver driver) : base(driver)
         {
 
@@ -21,19 +20,18 @@ namespace OnlineStoreTesting.Pages
 
         public void AddToCart(string productName)
         {
-           
-            IWebElement product = _driver.FindElement(_productLocator);
+
+            WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
+            IWebElement finditem = _driver.FindElement(By.XPath($"//li[@class='item product product-item']//img[@alt='{productName}']"));
             Actions actions = new Actions(_driver);
-            actions.MoveToElement(product);
+            actions.MoveToElement(finditem);
             actions.Perform();
-            IWebElement addToCart = _driver.FindElement(_addToCartButtonLocator);
-           ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click()", addToCart);
-            
+            IWebElement productAddToCart = _driver.FindElement(By.XPath($".//a[contains(text(),'{productName}')]/parent::*/parent::*//button"));
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath($".//a[contains(text(),'{productName}')]/parent::*/parent::*//button")));
+            productAddToCart.Click();
 
         }
-         
-          
-        
+
         public void ClickProceedToCheckoutButton()
         {
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
@@ -41,18 +39,15 @@ namespace OnlineStoreTesting.Pages
             IWebElement checkoutButton = _driver.FindElement(_proceedToCheckout);
             checkoutButton.Click();
 
-           
-
         }
         public void ClickCartButton()
         {
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-        
             wait.Until((driver) => driver.FindElement(_cartButtonLocator));
-            Thread.Sleep(2000);
             IWebElement cartButton = _driver.FindElement(_cartButtonLocator);
-           IWebElement numberOfItems = _driver.FindElement(_numberOfItemsLocator);
-            wait.Until((driver) => numberOfItems.GetAttribute("class") == "counter qty");
+            wait.Until(ExpectedConditions.InvisibilityOfElementLocated(_addingItemToCartLoader));
+            IWebElement numberOfItems = _driver.FindElement(_numberOfItemsLocator);
+            wait.Until(ExpectedConditions.ElementIsVisible(_numberOfItemsLocator));
             cartButton.Click();
         }
         public void NavigateToBags()
@@ -61,16 +56,7 @@ namespace OnlineStoreTesting.Pages
             IWebElement bagsCategoryButton = _driver.FindElement(_bagsButtonLocator);
             wait.Until((driver) => driver.FindElement(_bagsButtonLocator));
             bagsCategoryButton.Click();
-
-            
-
         }
-
-
-
-
-
-
 
     }
 }

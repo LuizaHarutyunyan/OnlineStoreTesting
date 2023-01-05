@@ -10,7 +10,9 @@ namespace OnlineStoreTesting.Pages
         private readonly By _placeOrderButtonLocator = By.XPath(".//button[@title='Place Order']");
         private readonly By _orderNumberLocator = By.ClassName("order-number");
         private readonly By _continueShoppingLoactor = By.XPath(".//*[contains(text(),'Continue Shopping')]");
-       
+        private readonly By _placeOrderLoader = By.XPath(".//div[@class='loader']");
+
+
         public OrderInformationPage(IWebDriver driver) : base(driver)
         {
 
@@ -19,10 +21,9 @@ namespace OnlineStoreTesting.Pages
         public void PlaceOrder()
         {
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
-            wait.Until((driver) => driver.FindElement(_placeOrderButtonLocator));
+            wait.Until(ExpectedConditions.InvisibilityOfElementLocated(_placeOrderLoader));
             IWebElement element = _driver.FindElement(_placeOrderButtonLocator);
-            wait.Until(ExpectedConditions.ElementToBeClickable(_placeOrderButtonLocator));
-            Thread.Sleep(3000);
+            wait.Until(ExpectedConditions.ElementIsVisible(_placeOrderButtonLocator));
             element.Click();
             wait.Until((driver) => driver.Navigate());
 
@@ -30,7 +31,7 @@ namespace OnlineStoreTesting.Pages
         public void GetNumber()
         {
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
-            Thread.Sleep(3000);
+            wait.Until(ExpectedConditions.ElementIsVisible(_orderNumberLocator));
             IWebElement element = _driver.FindElement(_orderNumberLocator);
             string getOrderNumber = element.Text;
             

@@ -1,93 +1,86 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+
 
 namespace OnlineStoreTesting.Pages
 {
     internal class BagProductCategoryPage : WatchesCategoryPage
     {
-        private readonly By _bagsLoactor = By.XPath("(.//*[@class='item product product-item'])[3]");
-        private readonly By _addToCartLocatorOfFirstBag = By.XPath("(.//*[contains(text(),'Add to Cart')])[1]");
-        private readonly By _findFirstBagLocator = By.XPath("(.//*[@class='item product product-item'])[1]");
-        private readonly By _addToCartLocatorOfSecondBag = By.XPath("(.//*[contains(text(),'Add to Cart')])[2]");
-        private readonly By _findSecondBagLoactor = By.XPath("(.//*[@class='item product product-item'])[2]");
-        private readonly By _removeButtonLocator = By.XPath(".//*[@title='Remove item']");
+        private readonly By _removeButtonLocator = By.XPath(".//*[@class='action delete']");
         private readonly By _cartLocator = By.XPath(".//*[@class='action showcart']");
         private readonly By _addedProductsNumberLocator = By.XPath(".//*[@class='counter-number']");
         private readonly By _confirmRemoveProductFromCartLocator = By.XPath(".//*[contains(text(),'OK')]");
+        private readonly By _addingItemToCartLoader = By.XPath(".//div[@class='loader']");
+        private readonly By _miniCartLocator = By.Id("mini-cart");
 
 
         public BagProductCategoryPage(IWebDriver driver) : base(driver)
         {
         }
         
-        public void NavigateToProductInfo()
+        public void NavigateToProductInfo(string productName)
 
         {
-            IWebElement webElement= _driver.FindElement(_bagsLoactor);
+            IWebElement webElement= _driver.FindElement(By.XPath($"//li[@class='item product product-item']//a[contains(text(),'{productName}')]"));
             WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-            wait.Until((driver) => driver.FindElement(_bagsLoactor));
+            wait.Until((driver) => driver.FindElement(By.XPath($"//li[@class='item product product-item']//a[contains(text(),'{productName}')]")));
             webElement.Click();
            
         }
 
-        public void AddToCart()
+        public void AddToCart(string productName)
         {
-            IWebElement firstBag = _driver.FindElement(_findFirstBagLocator);
-            Actions action1 = new Actions(_driver);
-            action1.MoveToElement(firstBag);
-            action1.Perform();
-            IWebElement addToCart1 = _driver.FindElement(_addToCartLocatorOfFirstBag);
-            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click()", addToCart1);
             
+            WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
+            IWebElement finditem = _driver.FindElement(By.XPath($"//li[@class='item product product-item']//a[contains(text(),'{productName}')]"));
+            Actions actions = new Actions(_driver);
+            actions.MoveToElement(finditem);
+            actions.Perform();
+            IWebElement productAddToCart = _driver.FindElement(By.XPath($".//a[contains(text(),'{productName}')]/parent::*/parent::*//button"));
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath($".//a[contains(text(),'{productName}')]/parent::*/parent::*//button")));
+            productAddToCart.Click();
+            wait.Until((driver) => driver.FindElements(_addingItemToCartLoader).Count == 0);
 
-            IWebElement secondBag = _driver.FindElement(_findSecondBagLoactor);
-            Actions action2 = new Actions(_driver);
-            action2.MoveToElement(secondBag);
-            action2.Perform();
-            IWebElement addToCart2 = _driver.FindElement(_addToCartLocatorOfSecondBag);
-            ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click()", addToCart2);
         }
 
         public void DeleteAllAddToCartProducts()
         {
             WebDriverWait wait = new WebDriverWait(_driver, new TimeSpan(0, 0, 30));
             wait.Until((driver) => driver.FindElement(_addedProductsNumberLocator));
+            wait.Until(ExpectedConditions.ElementIsVisible(_addedProductsNumberLocator));
             IWebElement numberOfProducts = _driver.FindElement(_addedProductsNumberLocator);
-            Thread.Sleep(3000);
             string number = numberOfProducts.Text;
-            if (true)
-            {
-              
-                wait.Until((driver) => driver.FindElement(_cartLocator));
-                IWebElement cart = _driver.FindElement(_cartLocator);
-                cart.Click();
-                ReadOnlyCollection<IWebElement> remove = _driver.FindElements(_removeButtonLocator);
-                foreach (IWebElement element in remove)
+            wait.Until((driver) => driver.FindElement(_cartLocator));
+            IWebElement cart = _driver.FindElement(_cartLocator);
+            cart.Click();
+            ReadOnlyCollection<IWebElement> toRemove = _driver.FindElements(_removeButtonLocator);
+            int expectedCount=toRemove.Count;
+
+            while(expectedCount > 0)
                 {
+                    toRemove = _driver.FindElements(_removeButtonLocator);
+                    var element = toRemove.First();
                     wait.Until(ExpectedConditions.ElementToBeClickable(element));
-                    IWebElement webElement = _driver.FindElement(By.XPath("//*[@id='mini-cart']"));
-                    ReadOnlyCollection<IWebElement> webElements = webElement.FindElements(By.XPath(".//*[@class='action delete']"));
+                    IWebElement webElement = _driver.FindElement(_miniCartLocator);
+                    ReadOnlyCollection<IWebElement> webElements = webElement.FindElements(_removeButtonLocator);
                     webElements[0].Click();
                     wait.Until(ExpectedConditions.ElementToBeClickable(_removeButtonLocator));
-
-                   
                     IWebElement okButton = _driver.FindElement(_confirmRemoveProductFromCartLocator);
+                    wait.Until(ExpectedConditions.ElementToBeClickable(_confirmRemoveProductFromCartLocator));
                     okButton.Click();
-                    wait.Until((driver) => driver.FindElement(_removeButtonLocator));
-                    Thread.Sleep(3000);
                    
-
+                    expectedCount--;
+                    wait.Until((driver) => driver.FindElements(_removeButtonLocator).Count == expectedCount);
 
 
                 }
+
             }
         }
 
 
     }
-}
+
